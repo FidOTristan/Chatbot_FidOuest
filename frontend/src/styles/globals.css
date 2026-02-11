@@ -1,0 +1,150 @@
+/* ================================
+   Thèmes (dark par défaut)
+   - Le thème actif est choisi par [data-theme] sur <html> (ou <body>)
+================================ */
+
+/* === DARK (thème actuel) === */
+:root,
+:root[data-theme="dark"],
+html[data-theme="dark"] {
+  /* Base colors */
+  --bg-root: #121212;
+  --bg-elev-1: #1a1a1a;
+  --bg-elev-2: #1f1f1f;
+  --bg-elev-3: #222222;
+  --bg-header: #1e1e1e;
+
+  --text-primary: #e8eaed;
+  --text-secondary: #b0b0b0;
+  --text-muted: #9aa3a7;
+
+  --heading-fg: #37a855; /* Couleur des titres */
+  --code-fg: #b0e0c0;    /* Couleur du code inline */
+
+  --brand: #2bb673;
+  --brand-hover: #27a56a;
+
+  /* Bordures */
+  --border-1: #2b2b2b;
+  --border-2: #3a3a3a;
+  --border-3: #4a4a4a;
+
+  /* Spécifiques UI */
+  --bubble-user-bg: #2a2a2a;     /* ancien hardcode pour bulle user */
+  --bubble-assistant-bg: var(--bg-elev-2);
+  --copy-btn-bg: #232323;         /* bouton "Copier" */
+  --copy-btn-fg: #cfe7d4;
+
+  --code-bg: #2c2c2c;             /* bg pour `code` inline */
+  --pre-bg: #181818;               /* bg pour blocs `pre` */
+
+  --caret: #e8eaed;               /* couleur du curseur d'édition */
+  --placeholder: #777;            /* placeholder textarea/input */
+
+  /* Dégradé du composer (haut -> fond) */
+  --fade-top: rgba(18, 18, 18, 0);
+
+  /* Sizing */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  --space-1: 6px;
+  --space-2: 8px;
+  --space-3: 10px;
+  --space-4: 12px;
+  --space-5: 14px;
+  --space-6: 16px;
+
+  --font-body: 'Segoe UI', sans-serif;
+  --font-mono: 'Consolas', monospace;
+}
+
+/* === LIGHT === */
+:root[data-theme="light"],
+html[data-theme="light"] {
+  
+  /* Fonds */
+  --bg-root: #FAFAF9;     /* fond app */
+  --bg-elev-1: #FFFFFF;   /* panneaux / bulles */
+  --bg-elev-2: #F6F6F4;   /* champs / zones secondaires */
+  --bg-elev-3: #EFEFEB;   /* hover léger / boutons secondaires */
+  --bg-header: #FFFFFF;   /* entête */
+  
+  /* Texte */
+  --text-primary: #1F2937;   /* gris “slate-800” (lisible sans être noir pur) */
+  --text-secondary: #4B5563; /* slate-600 */
+  --text-muted: #94A3B8;     /* slate-400/500, pour placeholders */
+
+  /* Titres / code */
+  --heading-fg: #2F855A;  /* titres */
+  --code-fg: #334155;     /* texte de code inline (plus sombre que bleu vif) */
+
+  /* Marque */
+  --brand: #2BB673;
+  --brand-hover: #27A56A;
+
+  /* Bordures */
+  --border-1: #E7E5E4;       /* stone-200 */
+  --border-2: #DDDAD7;       /* stone-300 */
+  --border-3: #CFCBC7;       /* stone-400 */
+
+  /* Bulles / boutons secondaires */
+  --bubble-user-bg: #FFFFFF;           /* bulle user claire */
+  --bubble-assistant-bg: #F5F6F7;
+  --copy-btn-bg: #FFFFFF;              /* bouton "Copier" clair */
+  --copy-btn-fg: #1F2937;
+
+  /* Code & pre */
+  --code-bg: #F3F6FA;                  /* bg pour `code` inline */
+  --pre-bg: #F7F9FC;                  /* bg pour blocs `pre` */
+
+  /* Curseur & placeholders */
+  --caret: #1F2937;                    /* curseur visible en clair */
+  --placeholder: #9AA3AD;              /* placeholder lisible */
+
+  /* Dégradé du composer (haut -> fond) */
+  /* --fade-top: rgba(247, 247, 248, 0);   dégradé -> fond clair */
+  --fade-top: rgba(250, 250, 249, 0);   /* dégradé -> fond clair */
+
+  /* Sizing & fonts (inchangés) */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  --space-1: 6px;
+  --space-2: 8px;
+  --space-3: 10px;
+  --space-4: 12px;
+  --space-5: 14px;
+  --space-6: 16px;
+
+  --font-body: 'Segoe UI', sans-serif;
+  --font-mono: 'Consolas', monospace;
+}
+
+/* ================================
+   Reset / Root
+================================ */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  background: var(--bg-root);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}

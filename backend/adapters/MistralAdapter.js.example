@@ -1,0 +1,145 @@
+// backend/adapters/MistralAdapter.js
+import { BaseAdapter } from './BaseAdapter.js';
+
+/**
+ * Adapter pour l'API Mistral AI.
+ * 
+ * EXAMPLE - À implémenter quand vous serez prêt à ajouter Mistral.
+ * 
+ * Ce fichier montre la structure attendue pour un nouvel adapter.
+ * Toutes les méthodes doivent retourner des objets au format standardisé
+ * défini dans BaseAdapter.js
+ */
+export class MistralAdapter extends BaseAdapter {
+  /**
+   * @param {Object} config
+   * @param {string} config.apiKey - Clé API Mistral
+   * @param {number} [config.maxTokens=4096] - Nombre maximum de tokens
+   */
+  constructor(config) {
+    super(config);
+    
+    if (!config.apiKey) {
+      throw new Error('MistralAdapter: apiKey est requis');
+    }
+
+    // TODO: Initialiser le client Mistral
+    // this.client = new MistralClient({ apiKey: config.apiKey });
+    this.maxTokens = config.maxTokens ?? 4096;
+  }
+
+  /**
+   * @returns {string}
+   */
+  getProviderName() {
+    return 'Mistral';
+  }
+
+  /**
+   * Upload des fichiers vers Mistral.
+   * Note: Vérifier si Mistral supporte l'upload de fichiers et adapter en conséquence.
+   * 
+   * @param {Array<{buffer: Buffer, originalname: string, size: number}>} files
+   * @returns {Promise<Array<{name: string, size: number, file_id: string}>>}
+   */
+  async uploadFiles(files) {
+    // TODO: Implémenter l'upload pour Mistral
+    // Si Mistral ne supporte pas les fichiers, lever une erreur explicite
+    throw new Error('MistralAdapter.uploadFiles() - À implémenter');
+  }
+
+  /**
+   * Supprime un fichier de Mistral.
+   * 
+   * @param {string} fileId
+   * @returns {Promise<void>}
+   */
+  async deleteFile(fileId) {
+    // TODO: Implémenter la suppression pour Mistral
+    throw new Error('MistralAdapter.deleteFile() - À implémenter');
+  }
+
+  /**
+   * Envoie une requête de chat à Mistral.
+   * 
+   * IMPORTANT: Cette méthode doit retourner un objet StandardizedResponse
+   * 
+   * @param {import('./BaseAdapter.js').ChatRequest} request
+   * @returns {Promise<import('./BaseAdapter.js').StandardizedResponse>}
+   */
+  async sendChatRequest(request) {
+    const { messages, file_ids = [], model } = request;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      throw new Error('Le tableau messages est requis et ne peut pas être vide');
+    }
+
+    // TODO: Implémenter l'appel à l'API Mistral
+    
+    // Exemple de structure attendue :
+    /*
+    const response = await this.client.chat({
+      model: model,
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content
+      })),
+      max_tokens: this.maxTokens
+    });
+
+    // Transformer la réponse Mistral en format standardisé
+    return {
+      content: response.choices[0].message.content,
+      usage: {
+        total_tokens: response.usage.total_tokens,
+        prompt_tokens: response.usage.prompt_tokens,
+        completion_tokens: response.usage.completion_tokens,
+      },
+      tokensUsed: response.usage.total_tokens
+    };
+    */
+
+    throw new Error('MistralAdapter.sendChatRequest() - À implémenter');
+  }
+
+  /**
+   * Méthode helper privée pour transformer les messages si nécessaire.
+   * 
+   * @private
+   * @param {import('./BaseAdapter.js').StandardizedMessage[]} messages
+   * @returns {Array}
+   */
+  _transformMessagesForMistral(messages) {
+    // TODO: Adapter le format des messages si Mistral a des exigences spécifiques
+    return messages;
+  }
+}
+
+/*
+ * ÉTAPES POUR L'IMPLÉMENTATION:
+ * 
+ * 1. Installer le SDK Mistral
+ *    npm install @mistralai/mistralai
+ * 
+ * 2. Importer et initialiser le client
+ *    import { MistralClient } from '@mistralai/mistralai';
+ * 
+ * 3. Implémenter sendChatRequest():
+ *    - Appeler l'API Mistral avec les messages
+ *    - Transformer la réponse en StandardizedResponse
+ *    - Gérer les erreurs spécifiques à Mistral
+ * 
+ * 4. Implémenter uploadFiles() et deleteFile():
+ *    - Vérifier la documentation Mistral pour le support des fichiers
+ *    - Si pas de support, adapter la logique ou retourner une erreur claire
+ * 
+ * 5. Ajouter le cas 'mistral' dans ChatService._createAdapter()
+ * 
+ * 6. Configurer dans index.js:
+ *    const chatService = new ChatService({
+ *      provider: 'mistral',
+ *      providerConfig: { apiKey: process.env.MISTRAL_API_KEY }
+ *    });
+ * 
+ * 7. Tester complètement avant de déployer
+ */

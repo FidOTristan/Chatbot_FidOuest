@@ -1,0 +1,119 @@
+/* Wrapper de la zone de saisie (collée en bas) */
+.composer-wrap {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-3) var(--space-5) var(--space-5);
+  background: linear-gradient(180deg, var(--fade-top) 0%, var(--bg-root) 40%);
+}
+
+/* Bulle container */
+.composer-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 2px 18px rgba(0,0,0,.25);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+}
+.composer-bubble.vertical { display: flex; flex-direction: column; }
+
+/* Zone multi-lignes */
+.composer-input {
+  display: block;
+  width: 100%; max-width: 100%; resize: none;
+  min-height: 52px; max-height: 180px; line-height: 1.35;
+  padding: 12px; border: 0; border-radius: 10px;
+  background: var(--bg-elev-2);
+  color: var(--text-primary);
+  caret-color: var(--caret);
+  font-size: 15px; outline: none;
+  box-sizing: border-box;
+}
+.composer-input::placeholder { color: var(--placeholder); }
+
+/* Barre d’actions: gauche | centre | droite */
+.composer-actions {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 10px; width: 100%;
+  box-sizing: border-box; max-width: 100%;
+}
+.actions-left, .actions-center, .actions-right { min-width: 0; }
+.actions-left { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; }
+.actions-right { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Boutons (icônes & actions) */
+.icon-btn, .attachments-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 36px; min-width: 36px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-2);
+  background: var(--bg-elev-3);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, transform .05s;
+}
+.icon-btn:hover, .attachments-btn:hover { background: var(--bg-elev-2); border-color: var(--border-3); }
+.icon-btn:active, .attachments-btn:active { transform: translateY(1px); }
+.icon-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.icon-btn.send {
+  color: var(--bg-root);
+  background: var(--brand);
+  border-color: var(--brand);
+}
+.icon-btn.send:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+
+/* Select fichiers (centre) */
+.actions-center { display: flex; justify-content: center; }
+.attachments-select-wrap {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-width: 160px; max-width: 520px; width: 100%;
+  box-sizing: border-box; flex: 1 1 auto; min-width: 0;
+}
+.attachments-select {
+  flex: 1 1 auto; min-width: 0; width: 100%;
+  background: var(--bg-elev-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-2); border-radius: var(--radius-lg);
+  padding: 8px 10px; font-size: 14px; outline: none; box-sizing: border-box;
+}
+
+/* Espaceur visuel */
+.attachments-spacer {
+  display: inline-block; height: 36px; min-width: 36px; border-radius: var(--radius-lg);
+}
+
+/* Accessibilité */
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+/* Spinner */
+.spinner {
+  color: var(--brand);
+  width: 18px; height: 18px;
+  display: inline-block; position: relative; margin-left: 8px;
+}
+.spinner::before {
+  content: "";
+  box-sizing: border-box; position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  animation: spin .8s linear infinite; will-change: transform;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner::before { animation-duration: 2.4s; } }
+
+/* Responsive */
+@media (max-width: 640px) { .attachments-select-wrap { max-width: 360px; } }
+@media (max-width: 420px) {
+  .attachments-select-wrap { max-width: 260px; }
+  .composer-actions { gap: 8px; }
+}

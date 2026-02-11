@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&family=Rajdhani:wght@500;600;700&display=swap');
+
+.header {
+  background: linear-gradient(135deg, var(--bg-header) 0%, var(--bg-elev-1) 100%);
+  padding: 0 var(--space-5);
+  border-bottom: 2px solid var(--border-1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+  overflow: visible;
+}
+
+.header h1 {
+  color: var(--brand);
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  padding-right: 8px;
+  line-height: 1.2;
+  letter-spacing: 1.5px;
+  font-family: 'Righteous', 'Arial Black', sans-serif;
+  font-style: italic;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-hover) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+  letter-spacing: 1px;
+  font-family: 'Rajdhani', sans-serif;
+  font-style: italic;
+}
+
+.company-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.company-logo:hover {
+  transform: scale(1.05);
+}
+
+.buttons-right {
+  margin-left: auto;
+}
+
+.select-gpt {
+  background-color: var(--bg-elev-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: 15px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle {
+  margin-left: 10px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 2px solid var(--border-2);
+  background: var(--bg-elev-3);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle:hover {
+  background: var(--bg-elev-2);
+  border-color: var(--border-3);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.theme-toggle:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
