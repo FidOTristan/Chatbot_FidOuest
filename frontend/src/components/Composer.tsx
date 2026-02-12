@@ -59,7 +59,7 @@ export default function Composer({
       <div className="composer-bubble vertical">
         <textarea
           className="composer-input"
-          placeholder="Écrivez votre message… (Ctrl/Cmd + Entrée pour envoyer)"
+          placeholder="Écrivez votre message… (Ctrl + Entrée pour envoyer)"
           value={input}
           onChange={onInput}
           onKeyDown={onKeyDown}
