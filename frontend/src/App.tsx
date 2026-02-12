@@ -1,5 +1,6 @@
 // src/App.tsx
 import { useEffect, useRef, useState } from 'react';
+import { marked } from 'marked';
 import './App.css';
 import ChatList from './components/ChatList';
 import Composer from './components/Composer';
@@ -84,6 +85,51 @@ function App() {
     scrollToBottom(true);
   }, [messages]);
 
+  const markdownToPlainText = (input: string) => {
+    let out = input.replace(/\r\n/g, '\n');
+
+    // Preserve fenced code blocks while removing the fences.
+    out = out.replace(/```[\s\S]*?```/g, (block) => {
+      const lines = block.split('\n');
+      lines.shift();
+      if (lines.length && lines[lines.length - 1].trim().startsWith('```')) {
+        lines.pop();
+      }
+      return lines.join('\n');
+    });
+
+    // Inline code
+    out = out.replace(/`([^`]+)`/g, '$1');
+
+    // Headings, blockquotes, lists
+    out = out.replace(/^#{1,6}\s+/gm, '');
+    out = out.replace(/^>\s?/gm, '');
+    out = out.replace(/^\s*[-*+]\s+/gm, '');
+    out = out.replace(/^\s*\d+\.\s+/gm, '');
+
+    // Links and images
+    out = out.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1');
+    out = out.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+    // Emphasis and strikethrough
+    out = out.replace(/\*\*([^*]+)\*\*/g, '$1');
+    out = out.replace(/__([^_]+)__/g, '$1');
+    out = out.replace(/\*([^*]+)\*/g, '$1');
+    out = out.replace(/_([^_]+)_/g, '$1');
+    out = out.replace(/~~([^~]+)~~/g, '$1');
+
+    // Horizontal rules
+    out = out.replace(/^\s*---+\s*$/gm, '');
+
+    return out;
+  };
+
+  const markdownToHtml = (input: string) => {
+    marked.setOptions({ mangle: false, headerIds: false });
+    const body = marked.parse(input);
+    return `<html><body>${body}</body></html>`;
+  };
+
   // ✅ Affiche les messages détaillés transmis par useAttachments (fallback générique)
   function pushAttachmentError(detail?: string) {
     const msg = detail && String(detail).trim().length > 0
@@ -95,18 +141,30 @@ function App() {
 
   const copyToClipboard = async (text: string, idx: number) => {
     try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
+      const copyText = markdownToPlainText(text);
+      const copyHtml = markdownToHtml(text);
+      if (navigator.clipboard && window.isSecureContext && window.ClipboardItem) {
+        const htmlBlob = new Blob([copyHtml], { type: 'text/html' });
+        const textBlob = new Blob([copyText], { type: 'text/plain' });
+        const item = new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob });
+        await navigator.clipboard.write([item]);
       } else {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
+        const container = document.createElement('div');
+        container.innerHTML = copyHtml;
+        container.style.position = 'fixed';
+        container.style.left = '-9999px';
+        container.contentEditable = 'true';
+        document.body.appendChild(container);
+
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(container);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
         document.execCommand('copy');
-        document.body.removeChild(ta);
+
+        document.body.removeChild(container);
+        selection?.removeAllRanges();
       }
       setCopiedIndex(idx);
       setTimeout(() => setCopiedIndex(null), 1500);
