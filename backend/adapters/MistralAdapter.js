@@ -54,16 +54,10 @@ export class MistralAdapter extends BaseAdapter {
 
     for (const file of files) {
       try {
-        // Valider le fichier
         DocumentExtractor.validateFile(file.buffer, file.originalname);
 
-        console.log(`[MistralAdapter] Uploading file: ${file.originalname} (${file.size} bytes)`);
-
-        // Convertir le buffer en Uint8Array (accepté par la validation Zod du SDK)
         const uint8Array = new Uint8Array(file.buffer);
 
-        // Upload vers Mistral avec purpose="ocr"
-        // Le SDK accepte un objet avec fileName et content (Uint8Array)
         const uploadedFile = await this.client.files.upload({
           file: {
             fileName: file.originalname,
@@ -77,8 +71,6 @@ export class MistralAdapter extends BaseAdapter {
           size: file.size,
           file_id: uploadedFile.id,
         });
-
-        console.log(`[MistralAdapter] File uploaded: ${file.originalname} → ${uploadedFile.id}`);
       } catch (error) {
         console.error(`[MistralAdapter] Erreur upload ${file.originalname}:`, error.message);
         throw new Error(`Erreur upload ${file.originalname}: ${error.message}`);
@@ -205,10 +197,9 @@ export class MistralAdapter extends BaseAdapter {
         });
       }
 
-      // Fallback: convertir en string
       return String(content);
     } catch (error) {
-      console.error(`[MistralAdapter] Erreur download ${fileId}:`, error);
+      console.error('[MistralAdapter] Erreur download:', error.message);
       throw new Error(`Erreur download fichier: ${error.message}`);
     }
   }
@@ -238,8 +229,6 @@ export class MistralAdapter extends BaseAdapter {
 
     // Si des fichiers sont attachés, extraire le texte via OCR et inclure dans le message
     if (file_ids && file_ids.length > 0) {
-      console.log(`[MistralAdapter] ${file_ids.length} fichier(s) à traiter via OCR...`);
-      
       let documentContext = '\n\n--- DOCUMENTS ATTACHÉS ---\n';
       let filesProcessed = 0;
 
@@ -247,7 +236,6 @@ export class MistralAdapter extends BaseAdapter {
         try {
           const extractedText = await this.extractTextFromFile(fileId);
           
-          // Tronquer si trop long (max 5000 chars par fichier)
           const truncated = extractedText.length > 5000 
             ? extractedText.slice(0, 5000) + '\n[... contenu tronqué ...]'
             : extractedText;
@@ -255,16 +243,13 @@ export class MistralAdapter extends BaseAdapter {
           documentContext += `\n[Fichier: ${fileId}]\n${truncated}\n`;
           filesProcessed++;
 
-          // Supprimer le fichier après extraction (prévenir saturation de stockage)
           try {
             await this.deleteFile(fileId);
-            console.log(`[MistralAdapter] Fichier ${fileId} supprimé avec succès`);
           } catch (deleteError) {
-            console.warn(`[MistralAdapter] Impossible de supprimer ${fileId}:`, deleteError.message);
-            // Ne pas bloquer le chat si la suppression échoue
+            // Ignorer les erreurs de suppression
           }
         } catch (error) {
-          console.warn(`[MistralAdapter] Impossible de traiter ${fileId}:`, error.message);
+          console.error('[MistralAdapter] Erreur traitement fichier:', error.message);
           documentContext += `\n[Fichier: ${fileId}] - Erreur d'extraction\n`;
         }
       }
@@ -274,7 +259,6 @@ export class MistralAdapter extends BaseAdapter {
         const lastIdx = mistralMessages.length - 1;
         if (mistralMessages[lastIdx].role === 'user') {
           mistralMessages[lastIdx].content += documentContext;
-          console.log(`[MistralAdapter] ${filesProcessed}/${file_ids.length} fichier(s) traité(s) et supprimé(s)`);
         }
       }
     }
@@ -333,15 +317,9 @@ export class MistralAdapter extends BaseAdapter {
    */
   async deleteFile(fileId) {
     try {
-      console.log(`[MistralAdapter] Deleting file ${fileId}...`);
-      
       await this.client.files.delete({ fileId });
-      
-      console.log(`[MistralAdapter] File deleted: ${fileId}`);
     } catch (error) {
-      console.error(`[MistralAdapter] Erreur deletion ${fileId}:`, error.message);
-      // Ne pas lever l'erreur - ce n'est pas critical si la suppression échoue
-      // Mais on log pour monitoring
+      console.error('[MistralAdapter] Erreur suppression fichier:', error.message);
     }
   }
 
@@ -353,39 +331,29 @@ export class MistralAdapter extends BaseAdapter {
    */
   async deleteAllFiles() {
     try {
-      console.log('[MistralAdapter] 🧹 Nettoyage: listing all files...');
-      
-      // Lister tous les fichiers
       const response = await this.client.files.list();
       const files = response?.data ?? [];
       
       if (files.length === 0) {
-        console.log('[MistralAdapter] ✅ Aucun fichier à supprimer');
         return { deleted: 0, failed: 0 };
       }
-      
-      console.log(`[MistralAdapter] 📋 ${files.length} fichier(s) trouvé(s), suppression en cours...`);
       
       let deleted = 0;
       let failed = 0;
       
-      // Supprimer chaque fichier
       for (const file of files) {
         try {
           await this.client.files.delete({ fileId: file.id });
           deleted++;
-          console.log(`[MistralAdapter] ✓ Supprimé: ${file.id} (${file.filename || 'no name'})`);
         } catch (error) {
           failed++;
-          console.warn(`[MistralAdapter] ✗ Échec: ${file.id}:`, error.message);
         }
       }
       
-      console.log(`[MistralAdapter] 🎉 Nettoyage terminé: ${deleted} supprimés, ${failed} échecs`);
       return { deleted, failed };
       
     } catch (error) {
-      console.error('[MistralAdapter] Erreur lors du nettoyage des fichiers:', error.message);
+      console.error('[MistralAdapter] Erreur nettoyage:', error.message);
       return { deleted: 0, failed: 0 };
     }
   }

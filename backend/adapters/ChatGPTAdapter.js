@@ -80,12 +80,7 @@ export class ChatGPTAdapter extends BaseAdapter {
       await this.client.files.delete(fileId);
       this.fileMetaById.delete(fileId);
     } catch (e) {
-      console.warn('[ChatGPTAdapter] Erreur lors de la suppression du fichier:', {
-        fileId,
-        status: e?.status,
-        message: e?.message,
-      });
-      // On ne propage pas l'erreur pour ne pas bloquer le flux principal
+      // Ignorer les erreurs de suppression
     }
   }
 
@@ -146,11 +141,7 @@ export class ChatGPTAdapter extends BaseAdapter {
       // Fallback: convertir en string
       return String(content);
     } catch (e) {
-      console.error('[ChatGPTAdapter] Erreur lors du téléchargement du fichier:', {
-        fileId,
-        status: e?.status,
-        message: e?.message,
-      });
+      console.error('[ChatGPTAdapter] Erreur download:', e.message);
       throw e;
     }
   }
@@ -294,12 +285,11 @@ export class ChatGPTAdapter extends BaseAdapter {
         tokensUsed,
       };
     } finally {
-      // Suppression du Vector Store utilisé pour CETTE requête seulement
       if (vectorStore?.id) {
         try {
           await this.client.vectorStores.delete(vectorStore.id);
         } catch (e) {
-          console.warn('[ChatGPTAdapter] Erreur lors de la suppression du vector store:', e?.message);
+          // Ignorer les erreurs de suppression
         }
       }
     }
@@ -375,7 +365,6 @@ export class ChatGPTAdapter extends BaseAdapter {
    * @returns {Promise<{deleted: number, failed: number}>}
    */
   async deleteAllFiles() {
-    console.log('[ChatGPTAdapter] ⚠️  Suppression de fichiers non supportée par OpenAI');
     return { deleted: 0, failed: 0 };
   }
 }

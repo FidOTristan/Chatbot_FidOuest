@@ -124,47 +124,29 @@ ipcMain.handle('file:uploadByTokens', async (_evt, tokens, backendUrl) => {
   const form = new FormData();
   let count = 0;
   
-  console.log(`[FileUpload] Starting upload for ${tokens.length} token(s)`);
-  
   for (const token of tokens.slice(0, MAX_FILES)) {
     const p = tokenToPath.get(token);
-    if (!p) {
-      console.warn(`[FileUpload] No path for token ${token}`);
-      continue;
-    }
+    if (!p) continue;
     
     try {
       const st = fs.statSync(p);
-      console.log(`[FileUpload] File: ${p} (${st.size} bytes)`);
+      if (st.size > MAX_SIZE_BYTES) continue;
       
-      if (st.size > MAX_SIZE_BYTES) {
-        console.warn(`[FileUpload] File too large: ${p}`);
-        continue;
-      }
-      
-      // Ajouter le fichier directement en tant que stream
       const fileStream = fs.createReadStream(p);
       const filename = path.basename(p);
       form.append('files', fileStream, filename);
       count++;
-      console.log(`[FileUpload] Added to form: ${filename}`);
     } catch (err) {
-      console.error(`[FileUpload] Error processing ${p}:`, err.message);
+      console.error('[FileUpload] Error processing file:', err.message);
     }
   }
   
-  if (count === 0) {
-    console.warn('[FileUpload] No valid files to upload');
-    return [];
-  }
+  if (count === 0) return [];
   
   const port = parseInt(urlObj.port || '3000', 10);
-  console.log(`[FileUpload] Uploading ${count} file(s) to ${urlObj.hostname}:${port}${urlObj.pathname}`);
   
-  // Utiliser http.request pour envoyer les fichiers
   return new Promise((resolve, reject) => {
     const headers = form.getHeaders();
-    console.log(`[FileUpload] Headers:`, headers);
     
     const options = {
       hostname: urlObj.hostname,
@@ -175,17 +157,12 @@ ipcMain.handle('file:uploadByTokens', async (_evt, tokens, backendUrl) => {
     };
     
     const req = http.request(options, (res) => {
-      console.log(`[FileUpload] Response status: ${res.statusCode}`);
-      
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
         try {
-          console.log(`[FileUpload] Response body (first 500 chars):`, data.substring(0, 500));
-          
           if (res.statusCode !== 200) {
-            console.error('[FileUpload] Non-200 response:', res.statusCode, data);
-            reject(new Error(`Upload failed: HTTP ${res.statusCode} - ${data}`));
+            reject(new Error(`Upload failed: HTTP ${res.statusCode}`));
             return;
           }
           
@@ -195,22 +172,17 @@ ipcMain.handle('file:uploadByTokens', async (_evt, tokens, backendUrl) => {
             token,
             file_id: fileIds[i]?.file_id,
           })).filter(x => x.file_id);
-          console.log(`[FileUpload] Success: ${result.length} file(s) uploaded with IDs`);
           resolve(result);
         } catch (e) {
-          console.error('[FileUpload] Parse error:', e.message);
           reject(new Error(`Failed to parse response: ${e.message}`));
         }
       });
     });
     
     req.on('error', (err) => {
-      console.error('[FileUpload] Request error:', err.message);
       reject(err);
     });
     
-    // Pipe form data to request
-    console.log('[FileUpload] Piping form data to request...');
     form.pipe(req);
   });
 });

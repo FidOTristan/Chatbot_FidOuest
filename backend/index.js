@@ -49,26 +49,14 @@ const chatService = new ChatService({
  */
 app.post('/api/files', upload.array('files', MAX_FILES), async (req, res) => {
   try {
-    console.log(`[Upload] POST /api/files`);
-    console.log(`[Upload] Headers:`, req.headers);
-    console.log(`[Upload] Body keys:`, Object.keys(req.body));
-    console.log(`[Upload] Files count:`, req.files?.length ?? 0);
-    console.log(`[Upload] Files:`, req.files?.map(f => ({ name: f.originalname, size: f.size, mimetype: f.mimetype })));
-
     if (!req.files || req.files.length === 0) {
-      console.warn('[Upload] No files in request - returning 400');
       return res.status(400).json({
         error: 'NoFiles',
         message: 'Aucun fichier fourni'
       });
     }
 
-    console.log(`[Upload] Calling chatService.uploadFiles with ${req.files.length} file(s)`);
-
-    // Utiliser le ChatService pour uploader les fichiers via l'adapter Mistral
     const uploadResults = await chatService.uploadFiles(req.files);
-
-    console.log(`[Upload] Success: ${uploadResults.length} file(s) uploaded`);
 
     return res.json({
       success: true,
@@ -77,7 +65,7 @@ app.post('/api/files', upload.array('files', MAX_FILES), async (req, res) => {
   } catch (err) {
     const status = Number(err?.status ?? err?.statusCode ?? 400);
     const message = String(err?.message ?? 'Erreur lors de l\'upload');
-    console.error('[Upload Error]', { message, errorString: err?.toString(), statusCode: status });
+    console.error('[Upload Error]', message);
     return res.status(status >= 400 && status <= 599 ? status : 500).json({
       error: 'UploadError',
       message,
@@ -113,7 +101,7 @@ app.get('/api/files/:fileId/content', async (req, res) => {
   } catch (err) {
     const status = Number(err?.status ?? err?.statusCode ?? 400);
     const message = String(err?.message ?? 'Erreur lors du téléchargement');
-    console.error('[Download Error]', { message, err });
+    console.error('[Download Error]', message);
     return res.status(status >= 400 && status <= 599 ? status : 500).json({
       error: 'DownloadError',
       message,
@@ -140,7 +128,7 @@ async function handleChatRequest(req, res, model) {
   } catch (err) {
     const status = Number(err?.status ?? err?.statusCode ?? 500);
     const message = String(err?.message ?? `Erreur serveur (${model})`);
-    console.error('[Chat Error]', { message, err });
+    console.error('[Chat Error]', message);
     return res
       .status(status >= 400 && status <= 599 ? status : 500)
       .json({ 
@@ -159,23 +147,21 @@ async function handleChatRequest(req, res, model) {
 app.post('/api/chat', (req, res) => handleChatRequest(req, res, 'mistral-large-latest'));
 
 app.listen(port, async () => {
-  console.log(`[Mistral Config] keySuffix=${process.env.MISTRAL_API_KEY?.slice(-6) || 'none'}`);
   console.log(`Backend listening at http://localhost:${port}`);
   
-  // Test de connexion à la base de données
   try {
     const { connectDB } = await import('./db.ts');
     await connectDB();
   } catch (error) {
-    console.error('⚠️  Erreur lors de la connexion à la base de données:', error.message);
+    console.error('⚠️  Erreur de connexion à la base de données:', error.message);
   }
   
-  // Nettoyage des fichiers au démarrage
   try {
-    console.log('\n🧹 Nettoyage des fichiers Mistral au démarrage...');
     const result = await chatService.deleteAllFiles();
-    console.log(`✅ Nettoyage terminé: ${result.deleted} fichier(s) supprimé(s)\n`);
+    if (result.deleted > 0) {
+      console.log(`🧹 ${result.deleted} fichier(s) supprimé(s) au démarrage`);
+    }
   } catch (error) {
-    console.warn('⚠️  Erreur lors du nettoyage des fichiers:', error.message);
+    console.error('⚠️  Erreur lors du nettoyage des fichiers:', error.message);
   }
 });

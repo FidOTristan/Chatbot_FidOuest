@@ -110,7 +110,6 @@ export class ChatService {
     try {
       response = await this.adapter.sendChatRequest(processedRequest);
     } catch (error) {
-      console.error('[ChatService] Erreur lors de l\'appel à l\'adapter:', error);
       throw error;
     }
 

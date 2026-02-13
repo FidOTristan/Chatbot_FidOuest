@@ -45,16 +45,10 @@ async function purgeAllVectorStores() {
   await Promise.all(
     vs.map(async (v) => {
       try {
-        const resp = await client.vectorStores.delete(v.id);
-        console.log('[VS deleted]', { id: v.id, resp });
+        await client.vectorStores.delete(v.id);
       } catch (e) {
-        console.warn('[VS delete error]', {
-          id: v.id,
-          status: e?.status,
-          message: e?.message,
-          data: e?.response?.data,
-        });
-        errors.push({ id: v.id, status: e?.status, message: e?.message, data: e?.response?.data });
+        console.warn(`Erreur suppression VS ${v.id}:`, e?.message);
+        errors.push({ id: v.id, message: e?.message });
       }
     })
   );
@@ -72,16 +66,10 @@ async function purgeAllFiles() {
   await Promise.all(
     files.map(async (f) => {
       try {
-        const resp = await client.files.delete(f.id);
-        console.log('[File deleted]', { id: f.id, resp });
+        await client.files.delete(f.id);
       } catch (e) {
-        console.warn('[File delete error]', {
-          id: f.id,
-          status: e?.status,
-          message: e?.message,
-          data: e?.response?.data,
-        });
-        errors.push({ id: f.id, status: e?.status, message: e?.message, data: e?.response?.data });
+        console.warn(`Erreur suppression fichier ${f.id}:`, e?.message);
+        errors.push({ id: f.id, message: e?.message });
       }
     })
   );
@@ -91,23 +79,19 @@ async function purgeAllFiles() {
 }
 
 async function main() {
-  console.log('[OpenAI Config]', {
-    keySuffix: process.env.OPENAI_API_KEY?.slice(-6) || 'none',
-  });
-
   console.log('\n--- PURGE VECTOR STORES ---');
   const vsRes = await purgeAllVectorStores();
 
   console.log('\n--- PURGE FILES ---');
   const filesRes = await purgeAllFiles();
 
-  console.log('\nRésumé:', { vectorStoresDeleted: vsRes.deleted, filesDeleted: filesRes.deleted });
+  console.log('\nRésumé:', { vectorStores: vsRes.deleted, files: filesRes.deleted });
   if (vsRes.errors.length || filesRes.errors.length) {
-    console.log('\nErreurs:', { vs: vsRes.errors, files: filesRes.errors });
+    console.log('Erreurs:', { vs: vsRes.errors.length, files: filesRes.errors.length });
   }
 }
 
 main().catch((e) => {
-  console.error('Purge-all failed:', e?.status, e?.message, e?.response?.data);
+  console.error('Erreur purge:', e?.message);
   process.exit(1);
 });

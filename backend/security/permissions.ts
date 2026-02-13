@@ -28,8 +28,8 @@ export async function getPermissionsForCurrentUser(): Promise<FeatureFlags> {
 
     return flags;
   } catch (err) {
-    console.error('getPermissionsForCurrentUser error:', err);
-    return denyAll; // secure by default si la DB est down
+    console.error('Erreur permissions:', err?.message ?? err);
+    return denyAll;
   }
 
 }

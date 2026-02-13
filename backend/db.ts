@@ -33,18 +33,17 @@ export async function connectDB(): Promise<sql.ConnectionPool> {
   }
 
   if (!poolPromise) {
-    console.log(`[DB] Connecting to SQL Server: ${sqlConfig.server}\\${sqlConfig.options?.instanceName} - Database: ${sqlConfig.database}`);
     poolPromise = sql.connect(sqlConfig)
       .then(pool => {
         if (!isConnected) {
-          console.log(`✅ [DB] Connected successfully to ${sqlConfig.database}`);
+          console.log(`✅ Base de données connectée: ${sqlConfig.database}`);
           isConnected = true;
         }
         return pool;
       })
       .catch(err => {
-        console.error(`❌ [DB] Connection failed:`, err.message);
-        poolPromise = null; // Reset pour permettre une nouvelle tentative
+        console.error(`❌ Erreur de connexion DB:`, err.message);
+        poolPromise = null;
         throw err;
       });
   }
@@ -60,7 +59,6 @@ export type FeatureFlags = {
 
 // Lecture des permissions
 export async function getPermissions(user_name: string): Promise<FeatureFlags> {
-  console.log(`[DB] getPermissions for user: ${user_name}`);
   const db = await connectDB();
   const result = await db
     .request()
@@ -70,20 +68,14 @@ export async function getPermissions(user_name: string): Promise<FeatureFlags> {
     );
   const row = result.recordset?.[0];
 
-  console.log(`[DB] Query result for ${user_name}:`, row);
-
   if (!row) {
-    console.log(`[DB] User ${user_name} not found in database`);
     return { canUseApp: false, canImportFiles: false };
   }
 
-  const permissions = {
+  return {
     canUseApp: Boolean(Number(row.canUseApp ?? 0)),
     canImportFiles: Boolean(Number(row.canImportFiles ?? 0)),
   };
-
-  console.log(`[DB] Permissions for ${user_name}:`, permissions);
-  return permissions;
 }
 
 // Lecture des statistiques
@@ -138,31 +130,24 @@ export async function addCost(user_name: string, cost_to_add: number): Promise<v
 
 export async function addRequest(user_name: string): Promise<void> {
   const db = await connectDB();
-  const result = await db
+  await db
     .request()
     .input('user_name', sql.NVarChar, user_name)
     .query('UPDATE dbo.users SET totalRequests = ISNULL(totalRequests, 0) + 1 WHERE user_name = @user_name');
-  if (!result.rowsAffected?.[0]) {
-    console.warn(`[DB] addRequest did not update any row for user: ${user_name}`);
-  }
 }
 
 export async function addRequestWithFiles(user_name: string): Promise<void> {
   const db = await connectDB();
-  const result = await db
+  await db
     .request()
     .input('user_name', sql.NVarChar, user_name)
     .query('UPDATE dbo.users SET totalRequestsWithFiles = ISNULL(totalRequestsWithFiles, 0) + 1 WHERE user_name = @user_name');
-  if (!result.rowsAffected?.[0]) {
-    console.warn(`[DB] addRequestWithFiles did not update any row for user: ${user_name}`);
-  }
 }
 
 // Crée l'utilisateur s'il n'existe pas, avec des valeurs par défaut à 0.
 export async function ensureUserExists(user_name: string): Promise<void> {
-  console.log(`[DB] ensureUserExists for: ${user_name}`);
   const db = await connectDB();
-  const result = await db
+  await db
     .request()
     .input('user_name', sql.NVarChar, user_name)
     .query(
@@ -171,5 +156,4 @@ export async function ensureUserExists(user_name: string): Promise<void> {
          INSERT INTO dbo.users (user_name) VALUES (@user_name);
        END`
     );
-  console.log(`[DB] ensureUserExists completed for: ${user_name}, rows affected: ${result.rowsAffected?.[0] ?? 0}`);
 }

@@ -72,8 +72,6 @@ export function buildMessagesForLLM(
     }))
   );
 
-  console.log(messages)
-
   return { 
     messages,
     file_ids: fileIds

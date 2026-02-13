@@ -54,8 +54,6 @@ function App() {
         .catch((e) => setError('Impossible de récupérer les droits.'));
     }, []);
 
-  console.log(flags)
-
   // Thème
   // Applique l'attribut data-theme sur <html> et persiste
   useEffect(() => {
@@ -193,15 +191,11 @@ function App() {
       if (attachments && attachments.length > 0) {
         try {
           const tokens = attachments.map(a => a.token);
-          console.log(`[App] Uploading ${tokens.length} fichier(s)...`);
           
           // Utiliser l'API fileAPI pour uploader les fichiers
           if (window.fileAPI?.uploadByTokens) {
             const results = await window.fileAPI.uploadByTokens(tokens);
             file_ids = results.map(r => r.file_id);
-            console.log(`[App] Upload successful: ${file_ids.join(', ')}`);
-          } else {
-            console.warn('[App] fileAPI.uploadByTokens not available');
           }
         } catch (uploadErr: any) {
           const msg = uploadErr?.message ?? 'Erreur lors de l\'upload des fichiers';
