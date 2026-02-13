@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Righteous&family=Rajdhani:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Rajdhani:wght@500;600;700&display=swap');
 
 .header {
   background: linear-gradient(135deg, var(--bg-header) 0%, var(--bg-elev-1) 100%);
@@ -33,18 +33,18 @@
 .header h1 {
   color: var(--brand);
   font-size: 26px;
-  font-weight: 700;
+  font-weight: 900;
   margin: 0;
   padding-right: 8px;
   line-height: 1.2;
-  letter-spacing: 1.5px;
-  font-family: 'Righteous', 'Arial Black', sans-serif;
-  font-style: italic;
+  letter-spacing: 0.5px;
+  font-family: 'Playfair Display', Georgia, serif;
   text-transform: uppercase;
   background: linear-gradient(135deg, var(--brand) 0%, var(--brand-hover) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-stroke: 0.3px var(--brand);
 }
 
 .header-subtitle {
